@@ -68,13 +68,14 @@ var SkipperPostgreSQLAdapter = function () {
         pool: this.options.pool,
         debug: process.env.WATERLINE_DEBUG_SQL || this.options.debug
       });
-      this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
+      // and add data table
+      Promise.all([this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
         table.increments();
         table.string('fd');
         table.string('dirname');
         table.binary('data');
         table.timestamps();
-      });
+      })]);
     }
     knexes[this.hash] = this.knex;
   }
