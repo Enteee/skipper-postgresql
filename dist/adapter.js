@@ -8,10 +8,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-exports.default = function (options) {
-  return new SkipperPostgreSQLAdapter(options);
-};
-
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -19,6 +15,10 @@ var _lodash2 = _interopRequireDefault(_lodash);
 var _knex = require('knex');
 
 var _knex2 = _interopRequireDefault(_knex);
+
+var _objectHash = require('object-hash');
+
+var _objectHash2 = _interopRequireDefault(_objectHash);
 
 var _PostgresWritableStream = require('./PostgresWritableStream');
 
@@ -44,6 +44,8 @@ var defaults = {
   fileTable: 'file'
 };
 
+var knexes = {};
+
 var SkipperPostgreSQLAdapter = function () {
   function SkipperPostgreSQLAdapter() {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -51,35 +53,32 @@ var SkipperPostgreSQLAdapter = function () {
     _classCallCheck(this, SkipperPostgreSQLAdapter);
 
     this.options = _lodash2.default.defaultsDeep({}, options, defaults);
-
-    this.registerConnection();
-  }
-
-  _createClass(SkipperPostgreSQLAdapter, [{
-    key: 'registerConnection',
-    value: function registerConnection() {
-      var _this = this;
-
+    this.hash = (0, _objectHash2.default)(this.options);
+    // try to re-use knex instance
+    this.knex = knexes[this.hash];
+    if (!this.knex) {
+      // create new knex instance
       this.knex = (0, _knex2.default)({
         client: 'pg',
         connection: this.options.connection,
         pool: this.options.pool,
         debug: process.env.WATERLINE_DEBUG_SQL || this.options.debug
       });
-
-      return this.knex.schema.hasTable(this.options.fileTable).then(function (exists) {
-        if (exists) return;
-
-        return _this.knex.schema.createTable(_this.options.fileTable, function (table) {
-          table.text('fd');
-          table.text('dirname');
-          table.binary('data');
-        });
+      this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
+        table.increments();
+        table.string('fd');
+        table.string('dirname');
+        table.binary('data');
+        table.timestamps();
       });
     }
-  }, {
+    knexes[this.hash] = this.knex;
+  }
+
+  _createClass(SkipperPostgreSQLAdapter, [{
     key: 'teardown',
     value: function teardown() {
+      // will never be called (ugly!)
       return this.knex.destroy();
     }
 
@@ -154,3 +153,8 @@ var SkipperPostgreSQLAdapter = function () {
 
   return SkipperPostgreSQLAdapter;
 }();
+
+exports.default = SkipperPostgreSQLAdapter;
+//function (options) {
+//  return new SkipperPostgreSQLAdapter(options)
+//}
