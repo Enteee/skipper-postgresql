@@ -26,15 +26,16 @@
   },
   "homepage": "https://github.com/waterlinejs/skipper-postgresql",
   "devDependencies": {
-    "babel": "^5.8.23",
+    "babel": "^6.5.2",
+    "babel-preset-es2015-node": "^6.1.0",
     "gulp": "^3.9.0",
-    "gulp-babel": "^5.2.1",
+    "gulp-babel": "^6.1.2",
     "mocha": "^2.2.5",
-    "skipper-adapter-tests": "skipperjs/skipper-adapter-tests"
+    "skipper-adapter-tests": "balderdashy/skipper-adapter-tests"
   },
   "dependencies": {
-    "knex": "^0.10.0",
+    "knex": "^0.11.5",
     "lodash": "^4.6.1",
-    "pg": "^4.5.1"
+    "pg": "^5.0.0"
   }
 }
