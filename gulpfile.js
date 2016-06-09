@@ -3,6 +3,6 @@ var babel = require('gulp-babel');
 
 gulp.task('default', function () {
   return gulp.src([ 'lib/**' ])
-    .pipe(babel({"presets": ["es2015-node"]}))
+    .pipe(babel({"presets": ["es2015"]}))
     .pipe(gulp.dest('dist'));
 });

@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _stream = require('stream');
 
 var _path = require('path');
@@ -16,15 +18,27 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-class PostgresWritableStream extends _stream.Writable {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var PostgresWritableStream = function (_Writable) {
+  _inherits(PostgresWritableStream, _Writable);
 
   /**
    * @override
    * https://nodejs.org/api/stream.html#stream_new_stream_writable_options
    */
-  constructor(streamOptions, adapter) {
-    super(_lodash2.default.defaults({ objectMode: true }, streamOptions));
-    this.Adapter = adapter;
+
+  function PostgresWritableStream(streamOptions, adapter) {
+    _classCallCheck(this, PostgresWritableStream);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PostgresWritableStream).call(this, _lodash2.default.defaults({ objectMode: true }, streamOptions)));
+
+    _this.Adapter = adapter;
+    return _this;
   }
 
   /**
@@ -35,22 +49,32 @@ class PostgresWritableStream extends _stream.Writable {
    * @param encoding {null}
    * @param cb {Function}
    */
-  _write(file, encoding, cb) {
-    if (!file.byteCount) {
-      file.byteCount = file._readableState.length;
+
+
+  _createClass(PostgresWritableStream, [{
+    key: '_write',
+    value: function _write(file, encoding, cb) {
+      var _this2 = this;
+
+      if (!file.byteCount) {
+        file.byteCount = file._readableState.length;
+      }
+      return this.Adapter.knex(this.Adapter.options.fileTable).insert({
+        data: Buffer.concat(file._readableState.buffer),
+        fd: file.fd,
+        dirname: file.dirname || _path2.default.dirname(file.fd)
+      }).returning(['fd', 'dirname']).then(function (newFile) {
+        _this2.end();
+        cb();
+      }).catch(function (err) {
+        _this2.emit('error', err);
+        _this2.end();
+        cb(err);
+      });
     }
-    return this.Adapter.knex(this.Adapter.options.fileTable).insert({
-      data: Buffer.concat(file._readableState.buffer),
-      fd: file.fd,
-      dirname: file.dirname || _path2.default.dirname(file.fd)
-    }).returning(['fd', 'dirname']).then(newFile => {
-      this.end();
-      cb();
-    }).catch(err => {
-      this.emit('error', err);
-      this.end();
-      cb(err);
-    });
-  }
-}
+  }]);
+
+  return PostgresWritableStream;
+}(_stream.Writable);
+
 exports.default = PostgresWritableStream;
