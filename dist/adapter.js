@@ -24,6 +24,10 @@ var _objectHash = require('object-hash');
 
 var _objectHash2 = _interopRequireDefault(_objectHash);
 
+var _deasync = require('deasync');
+
+var _deasync2 = _interopRequireDefault(_deasync);
+
 var _PostgresWritableStream = require('./PostgresWritableStream');
 
 var _PostgresWritableStream2 = _interopRequireDefault(_PostgresWritableStream);
@@ -69,13 +73,23 @@ var SkipperPostgreSQLAdapter = function () {
         debug: process.env.WATERLINE_DEBUG_SQL || this.options.debug
       });
       // and add data table
-      Promise.all([this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
+      var done = false;
+      this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
         table.increments();
         table.string('fd');
         table.string('dirname');
         table.binary('data');
-        table.timestamps();
-      })]);
+        table.timestamp('createdAt').defaultTo(knex.fn.now());
+        table.timestamp('updatedAt').defaultTo(knex.fn.now());
+      }).then(function () {
+        done = true;
+      }).catch(function (err) {
+        console.error('Failed creating fileTable: ' + err);
+      });
+      // wait for completition
+      _deasync2.default.loopWhile(function () {
+        return !done;
+      });
     }
     knexes[this.hash] = this.knex;
   }

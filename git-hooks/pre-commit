@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+git stash -q --keep-index
+npm run prepublish
+git add dist/*
+git stash pop -q

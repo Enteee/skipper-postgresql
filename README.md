@@ -59,6 +59,14 @@ module.exports = {
 }
 ```
 
+## Development
+
+Install git hooks:
+
+```sh
+$ ln -rs git-hooks/* .git/hooks/
+```
+
 ## License
 MIT
 
