@@ -60,6 +60,7 @@ var SkipperPostgreSQLAdapter = function () {
 
     _classCallCheck(this, SkipperPostgreSQLAdapter);
 
+    var that = this;
     this.options = _lodash2.default.defaultsDeep({}, options, defaults);
     this.hash = (0, _objectHash2.default)(this.options);
     // try to re-use knex instance
@@ -79,8 +80,8 @@ var SkipperPostgreSQLAdapter = function () {
         table.string('fd');
         table.string('dirname');
         table.binary('data');
-        table.timestamp('createdAt').defaultTo(this.knex.fn.now());
-        table.timestamp('updatedAt').defaultTo(this.knex.fn.now());
+        table.timestamp('createdAt').defaultTo(that.knex.fn.now());
+        table.timestamp('updatedAt').defaultTo(that.knex.fn.now());
       }).then(function () {
         done = true;
       }).catch(function (err) {
