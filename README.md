@@ -77,7 +77,7 @@ MIT
 [npm-url]: https://npmjs.org/package/skipper-postgresql
 [ci-image]: https://img.shields.io/travis/skipperjs/skipper-postgresql/master.svg?style=flat-square
 [ci-url]: https://travis-ci.org/skipperjs/skipper-postgresql
-[daviddm-image]: http://img.shields.io/david/skipperjs/skipper-postgresql.svg?style=flat-square
+[daviddm-image]: http://img.shields.io/david/Enteee/skipper-postgresql.svg?style=flat-square
 [daviddm-url]: https://david-dm.org/skipperjs/skipper-postgresql
 [codeclimate-image]: https://img.shields.io/codeclimate/github/skipperjs/skipper-postgresql.svg?style=flat-square
 [codeclimate-url]: https://codeclimate.com/github/skipperjs/skipper-postgresql
