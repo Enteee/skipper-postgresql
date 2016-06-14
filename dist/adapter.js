@@ -79,8 +79,8 @@ var SkipperPostgreSQLAdapter = function () {
         table.string('fd');
         table.string('dirname');
         table.binary('data');
-        table.timestamp('createdAt').defaultTo(knex.fn.now());
-        table.timestamp('updatedAt').defaultTo(knex.fn.now());
+        table.timestamp('createdAt').defaultTo(this.knex.fn.now());
+        table.timestamp('updatedAt').defaultTo(this.knex.fn.now());
       }).then(function () {
         done = true;
       }).catch(function (err) {
