@@ -37,7 +37,7 @@ var PostgresWritableStream = function (_Writable) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PostgresWritableStream).call(this, _lodash2.default.defaults({ objectMode: true }, streamOptions)));
 
-    _this.Adapter = adapter;
+    _this.adapter = adapter;
     return _this;
   }
 
@@ -54,23 +54,16 @@ var PostgresWritableStream = function (_Writable) {
   _createClass(PostgresWritableStream, [{
     key: '_write',
     value: function _write(file, encoding, cb) {
-      var _this2 = this;
-
       if (!file.byteCount) {
         file.byteCount = file._readableState.length;
       }
-      return this.Adapter.knex(this.Adapter.options.fileTable).insert({
-        data: Buffer.concat(file._readableState.buffer),
+      return this.adapter.knex(this.adapter.options.fileTable).insert({
         fd: file.fd,
-        dirname: file.dirname || _path2.default.dirname(file.fd)
+        dirname: file.dirname || _path2.default.dirname(file.fd),
+        data: Buffer.concat(file._readableState.buffer)
       }).returning(['fd', 'dirname']).then(function (newFile) {
-        _this2.end();
         cb();
-      }).catch(function (err) {
-        _this2.emit('error', err);
-        _this2.end();
-        cb(err);
-      });
+      }).catch(cb);
     }
   }]);
 

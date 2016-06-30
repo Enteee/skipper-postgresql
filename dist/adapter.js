@@ -95,20 +95,14 @@ var SkipperPostgreSQLAdapter = function () {
     knexes[this.hash] = this.knex;
   }
 
+  /**
+   * Read a file from the upstream system (PostgreSQL)
+   *
+   * @param fd {FileDescriptor}
+   */
+
+
   _createClass(SkipperPostgreSQLAdapter, [{
-    key: 'teardown',
-    value: function teardown() {
-      // will never be called (ugly!)
-      return this.knex.destroy();
-    }
-
-    /**
-     * Read a file from the upstream system (PostgreSQL)
-     *
-     * @param fd {FileDescriptor}
-     */
-
-  }, {
     key: 'read',
     value: function read(options, cb) {
       var fd = _lodash2.default.isObject(options) ? options.fd : options;
