@@ -34,7 +34,6 @@
     "skipper-adapter-tests": "balderdashy/skipper-adapter-tests"
   },
   "dependencies": {
-    "deasync": "^0.1.7",
     "knex": "^0.11.5",
     "lodash": "^4.6.1",
     "object-hash": "^1.1.2",

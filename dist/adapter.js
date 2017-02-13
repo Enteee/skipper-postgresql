@@ -24,10 +24,6 @@ var _objectHash = require('object-hash');
 
 var _objectHash2 = _interopRequireDefault(_objectHash);
 
-var _deasync = require('deasync');
-
-var _deasync2 = _interopRequireDefault(_deasync);
-
 var _PostgresWritableStream = require('./PostgresWritableStream');
 
 var _PostgresWritableStream2 = _interopRequireDefault(_PostgresWritableStream);
@@ -56,7 +52,7 @@ var knexes = {};
 
 var SkipperPostgreSQLAdapter = function () {
   function SkipperPostgreSQLAdapter() {
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     _classCallCheck(this, SkipperPostgreSQLAdapter);
 
@@ -73,9 +69,15 @@ var SkipperPostgreSQLAdapter = function () {
         pool: this.options.pool,
         debug: process.env.WATERLINE_DEBUG_SQL || this.options.debug
       });
+    }
+    knexes[this.hash] = this.knex;
+  }
+
+  _createClass(SkipperPostgreSQLAdapter, [{
+    key: 'prepareSchema',
+    value: function prepareSchema(cb) {
       // and add data table
-      var done = false;
-      this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
+      return this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
         table.increments();
         table.string('fd');
         table.string('dirname');
@@ -83,39 +85,33 @@ var SkipperPostgreSQLAdapter = function () {
         table.timestamp('createdAt').defaultTo(that.knex.fn.now());
         table.timestamp('updatedAt').defaultTo(that.knex.fn.now());
       }).then(function () {
-        done = true;
-      }).catch(function (err) {
-        console.error('Failed creating fileTable: ' + err);
-      });
-      // wait for completition
-      _deasync2.default.loopWhile(function () {
-        return !done;
-      });
+        return cb(null);
+      }).catch(cb);
     }
-    knexes[this.hash] = this.knex;
-  }
 
-  /**
-   * Read a file from the upstream system (PostgreSQL)
-   *
-   * @param fd {FileDescriptor}
-   */
+    /**
+     * Read a file from the upstream system (PostgreSQL)
+     *
+     * @param fd {FileDescriptor}
+     */
 
-
-  _createClass(SkipperPostgreSQLAdapter, [{
+  }, {
     key: 'read',
     value: function read(options, cb) {
+      var _this = this;
+
       var fd = _lodash2.default.isObject(options) ? options.fd : options;
+      this.prepareSchema(function (err) {
+        if (err) return cb(err);
+        return _this.knex(_this.options.fileTable).select().where({ fd: fd }).then(function (_ref) {
+          var _ref2 = _slicedToArray(_ref, 1),
+              _ref2$ = _ref2[0],
+              file = _ref2$ === undefined ? {} : _ref2$;
 
-      return this.knex(this.options.fileTable).select().where({ fd: fd }).then(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 1);
-
-        var _ref2$ = _ref2[0];
-        var file = _ref2$ === undefined ? {} : _ref2$;
-
-        cb(null, file.data);
-        return file.data;
-      }).catch(cb);
+          cb(null, file.data);
+          return file.data;
+        }).catch(cb);
+      });
     }
 
     /**
@@ -127,9 +123,14 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'rm',
     value: function rm(fd, cb) {
-      return this.knex(this.options.fileTable).where({ fd: fd }).delete().then(function () {
-        cb();
-      }).catch(cb);
+      var _this2 = this;
+
+      this.prepareSchema(function (err) {
+        if (err) return cb(err);
+        return _this2.knex(_this2.options.fileTable).where({ fd: fd }).delete().then(function () {
+          cb();
+        }).catch(cb);
+      });
     }
 
     /**
@@ -141,12 +142,17 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'ls',
     value: function ls(dirname, cb) {
-      return this.knex(this.options.fileTable).select(['fd', 'dirname']).where({ dirname: dirname }).then(function () {
-        var files = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+      var _this3 = this;
 
-        cb(null, files);
-        return files;
-      }).catch(cb);
+      this.prepareSchema(function (err) {
+        if (err) return cb(err);
+        return _this3.knex(_this3.options.fileTable).select(['fd', 'dirname']).where({ dirname: dirname }).then(function () {
+          var files = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+          cb(null, files);
+          return files;
+        }).catch(cb);
+      });
     }
 
     /**
@@ -159,7 +165,7 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'receive',
     value: function receive() {
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       return new _PostgresWritableStream2.default(options, this);
     }

@@ -31,11 +31,10 @@ var PostgresWritableStream = function (_Writable) {
    * @override
    * https://nodejs.org/api/stream.html#stream_new_stream_writable_options
    */
-
   function PostgresWritableStream(streamOptions, adapter) {
     _classCallCheck(this, PostgresWritableStream);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PostgresWritableStream).call(this, _lodash2.default.defaults({ objectMode: true }, streamOptions)));
+    var _this = _possibleConstructorReturn(this, (PostgresWritableStream.__proto__ || Object.getPrototypeOf(PostgresWritableStream)).call(this, _lodash2.default.defaults({ objectMode: true }, streamOptions)));
 
     _this.adapter = adapter;
     return _this;
@@ -54,16 +53,21 @@ var PostgresWritableStream = function (_Writable) {
   _createClass(PostgresWritableStream, [{
     key: '_write',
     value: function _write(file, encoding, cb) {
+      var _this2 = this;
+
       if (!file.byteCount) {
         file.byteCount = file._readableState.length;
       }
-      return this.adapter.knex(this.adapter.options.fileTable).insert({
-        fd: file.fd,
-        dirname: file.dirname || _path2.default.dirname(file.fd),
-        data: Buffer.concat(file._readableState.buffer)
-      }).returning(['fd', 'dirname']).then(function (newFile) {
-        cb();
-      }).catch(cb);
+      this.adapter.prepareSchema(function (err) {
+        if (err) return cb(err);
+        return _this2.adapter.knex(_this2.adapter.options.fileTable).insert({
+          fd: file.fd,
+          dirname: file.dirname || _path2.default.dirname(file.fd),
+          data: Buffer.concat(file._readableState.buffer)
+        }).returning(['fd', 'dirname']).then(function (newFile) {
+          cb();
+        }).catch(cb);
+      });
     }
   }]);
 
