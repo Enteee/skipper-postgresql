@@ -56,7 +56,6 @@ var SkipperPostgreSQLAdapter = function () {
 
     _classCallCheck(this, SkipperPostgreSQLAdapter);
 
-    var that = this;
     this.options = _lodash2.default.defaultsDeep({}, options, defaults);
     this.hash = (0, _objectHash2.default)(this.options);
     // try to re-use knex instance
@@ -76,14 +75,16 @@ var SkipperPostgreSQLAdapter = function () {
   _createClass(SkipperPostgreSQLAdapter, [{
     key: 'prepareSchema',
     value: function prepareSchema(cb) {
+      var _this = this;
+
       // and add data table
       return this.knex.schema.createTableIfNotExists(this.options.fileTable, function (table) {
         table.increments();
         table.string('fd');
         table.string('dirname');
         table.binary('data');
-        table.timestamp('createdAt').defaultTo(that.knex.fn.now());
-        table.timestamp('updatedAt').defaultTo(that.knex.fn.now());
+        table.timestamp('createdAt').defaultTo(_this.knex.fn.now());
+        table.timestamp('updatedAt').defaultTo(_this.knex.fn.now());
       }).then(function () {
         return cb(null);
       }).catch(cb);
@@ -98,12 +99,12 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'read',
     value: function read(options, cb) {
-      var _this = this;
+      var _this2 = this;
 
       var fd = _lodash2.default.isObject(options) ? options.fd : options;
       this.prepareSchema(function (err) {
         if (err) return cb(err);
-        return _this.knex(_this.options.fileTable).select().where({ fd: fd }).then(function (_ref) {
+        return _this2.knex(_this2.options.fileTable).select().where({ fd: fd }).then(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 1),
               _ref2$ = _ref2[0],
               file = _ref2$ === undefined ? {} : _ref2$;
@@ -123,11 +124,11 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'rm',
     value: function rm(fd, cb) {
-      var _this2 = this;
+      var _this3 = this;
 
       this.prepareSchema(function (err) {
         if (err) return cb(err);
-        return _this2.knex(_this2.options.fileTable).where({ fd: fd }).delete().then(function () {
+        return _this3.knex(_this3.options.fileTable).where({ fd: fd }).delete().then(function () {
           cb();
         }).catch(cb);
       });
@@ -142,11 +143,11 @@ var SkipperPostgreSQLAdapter = function () {
   }, {
     key: 'ls',
     value: function ls(dirname, cb) {
-      var _this3 = this;
+      var _this4 = this;
 
       this.prepareSchema(function (err) {
         if (err) return cb(err);
-        return _this3.knex(_this3.options.fileTable).select(['fd', 'dirname']).where({ dirname: dirname }).then(function () {
+        return _this4.knex(_this4.options.fileTable).select(['fd', 'dirname']).where({ dirname: dirname }).then(function () {
           var files = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
           cb(null, files);
