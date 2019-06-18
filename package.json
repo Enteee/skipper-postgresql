@@ -2,10 +2,9 @@
   "name": "skipper-postgresql",
   "version": "0.13.2",
   "description": "Skipper Adapter for PostgreSQL and Sails",
-  "main": "dist/adapter.js",
+  "main": "lib/adapter.js",
   "scripts": {
-    "test": "gulp && node test/bootstrap.test.js",
-    "prepublish": "gulp"
+    "test": "node test/bootstrap.test.js"
   },
   "repository": {
     "type": "git",
@@ -28,8 +27,6 @@
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-preset-es2015": "^6.9.0",
-    "gulp": "^3.9.0",
-    "gulp-babel": "^6.1.2",
     "mocha": "^2.2.5",
     "skipper-adapter-tests": "balderdashy/skipper-adapter-tests"
   },
